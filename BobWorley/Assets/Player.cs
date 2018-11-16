@@ -18,7 +18,17 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {        
+
         isGrounded = Physics2D.IsTouching(GetComponent<CapsuleCollider2D>(), ground.GetComponent<TilemapCollider2D>());
+
+        CapsuleCollider2D playerCollider = GetComponent<CapsuleCollider2D>();       
+
+        /*if (isGrounded)
+        {
+            
+            playerCollider.bounds
+        }*/
+
         GetComponent<Animator>().SetBool("isGrounded", isGrounded);        
         float movimento = Input.GetAxis("Horizontal");        
         if (movimento < 0)
@@ -48,5 +58,15 @@ public class Player : MonoBehaviour {
                 GetComponent<Animator>().SetBool("Jumping", value: false);
             }            
         }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {        
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            Debug.Log("Colisão: " + collision);
+            Debug.Log("Contato: " + contact);
+            Debug.Log("Ponto de Contato: " + contact.point);
+        }        
     }
 }
