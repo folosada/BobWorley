@@ -12,12 +12,6 @@ public class CameraController : MonoBehaviour {
     public float TamanhoMinimoHorizontal;
     public float TamanhoMinimoVertical;
 
-
-    //const float TAMANHO_MAXIMO_HORIZONTAL = 171.5f;
-    //const float TAMANHO_MAXIMO_VERTICAL = 7.70f;
-    //const float TAMANHO_MINIMO_HORIZONTAL = 1.45f;
-    //const float TAMANHO_MINIMO_VERTICAL = -21.45f;
-
     // Use this for initialization
     void Start () {
 		
