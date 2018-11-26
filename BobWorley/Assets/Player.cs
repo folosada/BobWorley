@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     public Tilemap ground;
     private float jumpTime;
     public Canvas canvas;
+    public GameObject winPanel;
     private Scene actualScene;
     private Rigidbody2D rigibody;
     private SpriteRenderer spriteRenderer;
@@ -31,6 +32,10 @@ public class Player : MonoBehaviour
     public AudioClip eatingFoodSong;
     private AudioSource audioSource;
     private Animator animator;
+    private TilemapCollider2D platformCollider;
+    private float distToGround;
+    public Button yesButton;
+    public Button noButton;
 
     // Use this for initialization
     void Start()
@@ -45,11 +50,25 @@ public class Player : MonoBehaviour
         this.rigibody = GetComponent<Rigidbody2D>();
         this.spriteRenderer = GetComponent<SpriteRenderer>();
         PlayerProperties.collideMushroom.AddListener(collideMushroom);
+        PlayerProperties.collideEnemy.AddListener(collideEnemy);
         PlayerProperties.dead.AddListener(dead);
         PlayerProperties.loseLifeBlink.AddListener(loseLife);
         PlayerProperties.gainLifeBlink.AddListener(gainLife);
         PlayerProperties.eatFood.AddListener(eatingFood);
+        PlayerProperties.jump.AddListener(jump);
+        PlayerProperties.win.AddListener(win);
         animator = GetComponent<Animator>();
+        platformCollider = ground.GetComponent<TilemapCollider2D>();
+        distToGround = platformCollider.bounds.extents.y;
+        if (yesButton != null)
+        {
+            yesButton.onClick.AddListener(yesClick);
+        }
+        if (noButton != null)
+        {
+            noButton.onClick.AddListener(noClick);
+        }
+        
     }
 
     private void Awake()
@@ -68,8 +87,8 @@ public class Player : MonoBehaviour
             isDead = false;
         }
 
-        isGrounded = Physics2D.IsTouching(GetComponent<CapsuleCollider2D>(), ground.GetComponent<TilemapCollider2D>());
-
+        isGrounded = Physics2D.IsTouching(GetComponent<CapsuleCollider2D>(), ground.GetComponent<TilemapCollider2D>());        
+        
         animator.SetBool("isGrounded", isGrounded);
 
         movimentacao();
@@ -79,8 +98,28 @@ public class Player : MonoBehaviour
                 
     }
 
+    private bool IsGroundedEx()
+    {
+        return Physics2D.Raycast(transform.position, Vector2.down, distToGround + 0.1f);
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.IsTouching(GetComponent<CapsuleCollider2D>(), ground.GetComponent<TilemapCollider2D>());
+    }
+
     private void movimentacao()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (IsGrounded())
+            {
+                jump();
+                animator.SetBool("Jumping", value: true);
+                jumpTime = Time.time;
+            }
+        }
+
         float movimento = Input.GetAxis("Horizontal");
         if (movimento < 0)
         {
@@ -94,20 +133,20 @@ public class Player : MonoBehaviour
         }
         else
             animator.SetBool("Walking", value: false);
-        rigibody.velocity = new Vector2(movimento * velocidadeMaxima, rigibody.velocity.y);
-        if (isGrounded)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                audioSource.PlayOneShot(jumpAudio, 1.0f);
-                rigibody.AddForce(new Vector2(0, forcaPulo));
-                animator.SetBool("Jumping", value: true);
-                jumpTime = Time.time;
-            }
+        rigibody.velocity = new Vector2(movimento * velocidadeMaxima, rigibody.velocity.y);                       
 
+        if (IsGrounded())
+        {
             if (Time.time - jumpTime > 0.5)
                 animator.SetBool("Jumping", value: false);
         }
+            
+    }
+
+    private void jump()
+    {
+        audioSource.PlayOneShot(jumpAudio, 1.0f);        
+        rigibody.AddForce(new Vector2(0, forcaPulo));
     }
 
     private void OnBecameInvisible()
@@ -134,11 +173,48 @@ public class Player : MonoBehaviour
         }                
     }
 
+    private void win()
+    {        
+        this.reloadingScene = true;
+        if (SceneManager.sceneCountInBuildSettings == actualScene.buildIndex + 1)
+        {
+            Debug.Log("Parabéns, você ganhou!");
+        } else
+        {
+            winPanel.SetActive(true);            
+        }        
+    }
+
+    private void yesClick()
+    {
+        audioSource.Stop();
+        winPanel.SetActive(false);
+        SceneManager.LoadScene(actualScene.buildIndex + 1, LoadSceneMode.Single);
+    }
+
+    private void noClick()
+    {
+        Application.Quit();
+    }
+
     private void collideMushroom()
     {
-        rigibody.AddForce(new Vector2(0, forcaPulo));
+        if (rigibody.velocity.x > 0)
+        {
+            rigibody.AddForce(new Vector2(-forcaPulo, forcaPulo));
+        } else
+        {
+            rigibody.AddForce(new Vector2(forcaPulo, forcaPulo));
+        }
+        
         loseLife();
     }        
+
+    private void collideEnemy()
+    {
+        rigibody.AddForce(new Vector2(forcaPulo, 0));
+        loseLife();
+    }
 
     private void loseLife()
     {

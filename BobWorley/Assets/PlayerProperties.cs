@@ -8,10 +8,13 @@ public class PlayerProperties : ScriptableObject
     private static int vidas = initialLife;
     private static int food = 0;
     public static UnityEvent collideMushroom = new UnityEvent();
+    public static UnityEvent collideEnemy = new UnityEvent();
     public static UnityEvent dead = new UnityEvent();
     public static UnityEvent loseLifeBlink = new UnityEvent();
     public static UnityEvent gainLifeBlink = new UnityEvent();
     public static UnityEvent eatFood = new UnityEvent();
+    public static UnityEvent jump = new UnityEvent();
+    public static UnityEvent win = new UnityEvent();
 
     public static void removeLife()
     {
