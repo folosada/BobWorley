@@ -94,7 +94,7 @@ public class Player : MonoBehaviour
         movimentacao();
 
         Text vidasLabel = canvas.GetComponentInChildren<Text>();
-        vidasLabel.text = "VIDAS: " + PlayerProperties.getTotalLife();                                
+        vidasLabel.text = "VIDAS: " + PlayerProperties.getTotalLife() + "  COMIDAS: " + PlayerProperties.getTotalFood() + "/5";                                
                 
     }
 
@@ -174,21 +174,15 @@ public class Player : MonoBehaviour
     }
 
     private void win()
-    {        
-        this.reloadingScene = true;
-        if (SceneManager.sceneCountInBuildSettings == actualScene.buildIndex + 1)
-        {
-            Debug.Log("Parabéns, você ganhou!");
-        } else
-        {
-            winPanel.SetActive(true);            
-        }        
+    {                
+        winPanel.SetActive(true);                    
     }
 
     private void yesClick()
     {
         audioSource.Stop();
         winPanel.SetActive(false);
+        this.reloadingScene = true;
         SceneManager.LoadScene(actualScene.buildIndex + 1, LoadSceneMode.Single);
     }
 
